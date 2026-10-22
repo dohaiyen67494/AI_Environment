@@ -1,0 +1,555 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "AppController_getHealth",
+        "summary": "System Health Check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is healthy"
+          }
+        },
+        "tags": [
+          "System"
+        ]
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "operationId": "UsersController_getMe",
+        "summary": "Get current user profile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "User Profile"
+        ],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_updateMe",
+        "summary": "Update user profile (Cannot modify role)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully"
+          },
+          "400": {
+            "description": "Attempted to modify role or invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "tags": [
+          "User Profile"
+        ],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/v1/doctors": {
+      "get": {
+        "operationId": "DoctorsController_getDoctors",
+        "summary": "Get list of doctors",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of doctors retrieved successfully"
+          }
+        },
+        "tags": [
+          "Doctors & Availability"
+        ]
+      }
+    },
+    "/v1/doctors/{id}/availability": {
+      "get": {
+        "operationId": "DoctorsController_getAvailability",
+        "summary": "Get doctor availability (unbooked slots)",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "description": "Filter slots by date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-23",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available slots retrieved successfully"
+          },
+          "404": {
+            "description": "Doctor not found"
+          }
+        },
+        "tags": [
+          "Doctors & Availability"
+        ]
+      }
+    },
+    "/v1/appointments": {
+      "get": {
+        "operationId": "AppointmentsController_getAppointments",
+        "summary": "Get appointments (Patients can only see their own; other patients blocked with 403)",
+        "parameters": [
+          {
+            "name": "patientId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Patient ID (Restricted: Patients can only view their own)",
+            "schema": {
+              "example": "p1111111-1111-1111-1111-111111111111",
+              "type": "string"
+            }
+          },
+          {
+            "name": "doctorId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Doctor ID",
+            "schema": {
+              "example": "doc11111-1111-1111-1111-111111111111",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Appointment Status",
+            "schema": {
+              "enum": [
+                "PENDING",
+                "CONFIRMED",
+                "CHECKED_IN",
+                "COMPLETED",
+                "CANCELLED",
+                "RESCHEDULED"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of appointments"
+          },
+          "403": {
+            "description": "Forbidden if patient views another patient’s appointments"
+          }
+        },
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "AppointmentsController_createAppointment",
+        "summary": "Book appointment (Supports Idempotency-Key & anti-race-condition with 409 Conflict)",
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Unique client operation key preventing duplicate booking on network retries",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Appointment created successfully"
+          },
+          "409": {
+            "description": "Conflict: Slot already booked concurrently"
+          }
+        },
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/v1/appointments/{id}/reschedule": {
+      "post": {
+        "operationId": "AppointmentsController_rescheduleAppointment",
+        "summary": "Reschedule appointment atomically in 1 single Database Transaction",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RescheduleAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Appointment rescheduled successfully"
+          },
+          "403": {
+            "description": "Forbidden: Cannot reschedule another patient’s appointment"
+          },
+          "409": {
+            "description": "Conflict: Target slot already booked"
+          }
+        },
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/v1/appointments/{id}/check-in": {
+      "post": {
+        "operationId": "AppointmentsController_checkInAppointment",
+        "summary": "Check in for appointment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Checked in successfully"
+          },
+          "404": {
+            "description": "Appointment not found"
+          }
+        },
+        "tags": [
+          "Appointments"
+        ],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/v1/records": {
+      "post": {
+        "operationId": "RecordsController_createRecord",
+        "summary": "Store Encrypted Medical Record (NO PLAINTEXT ALLOWED)",
+        "description": "Backend only stores ciphertext, iv, tag, and signedPolicyId. Plaintext clinical fields will be rejected with 400 Bad Request.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEncryptedRecordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Encrypted record saved successfully"
+          },
+          "400": {
+            "description": "Attempted to send plaintext or invalid input"
+          }
+        },
+        "tags": [
+          "Encrypted Medical Records"
+        ],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    },
+    "/v1/records/{id}": {
+      "get": {
+        "operationId": "RecordsController_getRecord",
+        "summary": "Get Encrypted Record & Tide QEA Decryption Grant Token",
+        "description": "Returns ciphertext and signed policy. If x-tide-qea-assertion header is supplied with >= 2/3 Admin signatures, returns decryption grant token. Backend NEVER decrypts plaintext.",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-tide-qea-assertion",
+            "required": false,
+            "in": "header",
+            "description": "Tide Multi-Admin QEA Signed Assertion (JSON or Base64URL string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "qeaAssertion",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ciphertext and signed policy retrieved"
+          },
+          "403": {
+            "description": "Forbidden if Tide QEA threshold (< 2 admins) is not met"
+          },
+          "404": {
+            "description": "Record not found"
+          }
+        },
+        "tags": [
+          "Encrypted Medical Records"
+        ],
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "CareFlow Backend API",
+    "description": "CareFlow - Secure Medical Appointment & Encrypted Clinical Records with Tide QEA Multi-Admin Threshold Policy",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "http://localhost:3333",
+      "description": "CareFlow Backend Local Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "Authorization",
+        "description": "TideCloak JWT or DPoP bound Bearer token",
+        "in": "header"
+      },
+      "DPoP-header": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "DPoP",
+        "description": "RFC 9449 DPoP Proof Token (typ: dpop+jwt)"
+      }
+    },
+    "schemas": {
+      "UpdateMeDto": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string",
+            "example": "Lê Quốc Cường (Updated)"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0909999888"
+          },
+          "bio": {
+            "type": "string",
+            "example": "Bác sĩ chuyên khoa Tim mạch giàu kinh nghiệm"
+          }
+        }
+      },
+      "CreateAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "description": "Doctor ID or Doctor User ID",
+            "example": "doc11111-1111-1111-1111-111111111111"
+          },
+          "serviceId": {
+            "type": "string",
+            "description": "Medical Service ID",
+            "example": "s1111111-1111-1111-1111-111111111111"
+          },
+          "slotId": {
+            "type": "string",
+            "description": "Target Slot ID",
+            "example": "slot-uuid-1234"
+          },
+          "patientId": {
+            "type": "string",
+            "description": "Patient ID (Only applicable if Admin is booking; Patients are auto-assigned to themselves)",
+            "example": "p1111111-1111-1111-1111-111111111111"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes or symptoms",
+            "example": "Khám định kỳ huyết áp và tim mạch"
+          }
+        },
+        "required": [
+          "doctorId",
+          "serviceId",
+          "slotId"
+        ]
+      },
+      "RescheduleAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "newSlotId": {
+            "type": "string",
+            "description": "Target new Slot ID to move appointment to",
+            "example": "slot-new-uuid-5678"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for rescheduling",
+            "example": "Bận đột xuất vào buổi sáng, xin chuyển sang ca chiều"
+          }
+        },
+        "required": [
+          "newSlotId"
+        ]
+      },
+      "CreateEncryptedRecordDto": {
+        "type": "object",
+        "properties": {
+          "appointmentId": {
+            "type": "string",
+            "description": "Appointment ID associated with this medical record",
+            "example": "app-uuid-1111"
+          },
+          "patientId": {
+            "type": "string",
+            "description": "Patient ID",
+            "example": "p1111111-1111-1111-1111-111111111111"
+          },
+          "doctorId": {
+            "type": "string",
+            "description": "Doctor ID",
+            "example": "doc11111-1111-1111-1111-111111111111"
+          },
+          "ciphertext": {
+            "type": "string",
+            "description": "AES-256-GCM / Tide encrypted ciphertext (Base64 string). NO PLAINTEXT ALLOWED.",
+            "example": "oJd8s7dfY8sd7Fsd8F7sdg6sd8F6s8df76sdF8sd7f8s6dF8s6d..."
+          },
+          "iv": {
+            "type": "string",
+            "description": "Cryptographic Initialization Vector (IV, Base64/Hex)",
+            "example": "d9s8f7sd8f7s6d5f4s3a=="
+          },
+          "tag": {
+            "type": "string",
+            "description": "Authentication Tag (GCM Auth Tag, Base64/Hex)",
+            "example": "a1b2c3d4e5f67890=="
+          },
+          "signedPolicyId": {
+            "type": "string",
+            "description": "Tide Multi-Admin QEA Signed Policy ID",
+            "example": "pol-qea-2of3-sample"
+          }
+        },
+        "required": [
+          "appointmentId",
+          "patientId",
+          "doctorId",
+          "ciphertext",
+          "iv",
+          "tag",
+          "signedPolicyId"
+        ]
+      }
+    }
+  }
+}

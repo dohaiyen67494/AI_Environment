@@ -206,3 +206,57 @@ Toàn bộ **20/20 test cases** của `tide-qea.service.spec.ts` đều vượt 
   4. **Kiểm soát Quyền riêng tư**: Bệnh nhân không thể xem lịch khám hoặc hồ sơ của bệnh nhân khác (trả về `403 Forbidden`). Không thể tự đổi `role` qua `PATCH /v1/me`.
   5. **Chất lượng Kiểm thử**: 82/82 tests pass 100%, build production thành công.
 - **Hành động**: Đã duyệt merge branch `feature/phase-3-business-api` vào nhánh chính `main`. Chuyển giao sang Phase 4 & Phase 5 cho Agent B!
+
+---
+
+## Phase 4 & 5 Handoff: Nghiệm thu, Hợp đồng Frontend & Đóng gói Bài thi (Agent B)
+**Branch:** `feature/phase-4-5-delivery`  
+**Status:** `[READY_FOR_REVIEW]` (TASK-401, TASK-402, TASK-501, TASK-502)  
+**Date:** 2026-10-22  
+
+---
+
+### 1. Xuất file OpenAPI & Tài liệu Hợp đồng Frontend (TASK-401)
+- **Tập tin đặc tả OpenAPI:** 
+  - `docs/openapi.json` & `docs/careflow-openapi.json`
+  - Đầy đủ các paths: `/health`, `/v1/me`, `/v1/doctors`, `/v1/doctors/:id/available-slots`, `/v1/appointments`, `/v1/appointments/:id/reschedule`, `/v1/appointments/:id/check-in`, `/v1/records`, `/v1/records/:id`.
+  - Hỗ trợ Swagger UI trực quan tại `http://localhost:3333/api/docs`.
+- **Tài liệu Hướng dẫn Frontend:** `docs/frontend-integration.md`
+  - Hướng dẫn sinh khóa Web Crypto ECDSA P-256 (`ES256`) và tạo DPoP Proof Token chuẩn RFC 9449 kèm `ath`.
+  - Hướng dẫn xử lý lỗi `409 Conflict` khi xảy ra tranh chấp slot đồng thời.
+  - Hướng dẫn mô hình mã hóa Zero-Knowledge: Client mã hóa đối xứng AES-GCM-256 trước khi lưu, gửi Assertion 2/3 Admin qua header `x-tide-qea-assertion`, nhận `decryptionGrantToken` và giải mã cục bộ.
+
+---
+
+### 2. Bộ Test Nghiệm thu 6 Tiêu chí Cốt lõi (TASK-402)
+- **Tập tin kiểm thử:** `test/acceptance.spec.ts` (13 test cases nghiệm thu toàn diện)
+  - **Tiêu chí 1 (Hạ tầng Chuẩn Cổng):** Kiểm tra cấu hình bất biến Backend port `3333` và TideCloak port `8080` trong `docker-compose.yml`, `.env.example`, `careflow-realm.json`.
+  - **Tiêu chí 2 (Chống Race Condition):** Mô phỏng 2 request đồng thời vào 1 slot -> Request 1 thành công, Request 2 nhận đúng `409 Conflict`. Chặn bệnh nhân xem lịch người khác (`403 Forbidden`).
+  - **Tiêu chí 3 (Đổi lịch trong 1 Transaction):** Đổi slot thực thi nguyên tử qua `prisma.$transaction`. Nếu slot đích bận, toàn bộ giao dịch rollback và trả về `409 Conflict`.
+  - **Tiêu chí 4 (Zero-Knowledge, Chặn Plaintext):** Gửi trường plaintext (`diagnosis`) lập tức nhận `400 Bad Request`. Database chỉ lưu ciphertext, iv, tag, và signedPolicyId.
+  - **Tiêu chí 5 (1 Admin ký FAIL):** Bác sĩ hoặc Admin gửi assertion chỉ có 1 Admin ký (`1/3 < 2/3`) -> Nhận `403 Forbidden` (`Quorum threshold not met`). Admin không có quyền giải mã mặc định.
+  - **Tiêu chí 6 (2/3 Admin ký PASS):** Bác sĩ gửi assertion có 2/3 Admin ký (Admin 1+2, Admin 2+3,...) -> Nhận `200 OK` kèm `decryptionGrantToken` mở khóa giải mã cục bộ.
+
+---
+
+### 3. Đóng gói Bài thi & Kịch bản Video Demo (TASK-501 & TASK-502)
+- **README.md (TASK-501):**
+  - Viết lại súc tích, chuyên nghiệp: **257 từ** (tuân thủ nghiêm ngặt yêu cầu $\le 300$ từ).
+  - Khớp chính xác 5 tiêu chí chấm điểm của Hackathon RMIT UNLOCKED.
+  - Nêu rõ kiến trúc QEA 2/3, cổng chạy 3333/8080, lệnh chạy 1 bước `docker compose up --build`.
+- **Kịch bản Video Demo 2 phút (TASK-502):** `docs/DEMO_SCRIPT.md`
+  - Chi tiết từng giây từ 0:00 đến 2:00:
+    - `0:00 - 0:30`: Khởi động Docker 3333/8080 & Test race condition đặt trùng slot 409 Conflict.
+    - `0:30 - 0:50`: Đổi lịch trong 1 transaction & Lưu hồ sơ Zero-Knowledge (chặn plaintext 400).
+    - `0:50 - 1:25`: Bác sĩ yêu cầu giải mã với 1 Admin ký -> FAIL (403 Forbidden).
+    - `1:25 - 1:50`: Bác sĩ yêu cầu giải mã với 2/3 Admin ký qua Tide QEA -> PASS (200 OK + Grant Token).
+    - `1:50 - 2:00`: Tổng kết 95/95 test pass và hợp đồng OpenAPI Frontend.
+  - Kèm đầy đủ các câu lệnh cURL mẫu để quay phim thuận tiện.
+
+---
+
+### 4. Kết quả Kiểm thử & Build Toàn Dự Án
+- **Test Suites:** `13/13 passed (100%)`.
+- **Tổng số Tests:** `95/95 passed (100%)`.
+- **TypeScript build:** `0 errors`.
+- **Trạng thái:** Toàn bộ Phase 4 và Phase 5 đã hoàn tất, sẵn sàng bàn giao cho Reviewer thẩm định lần cuối trước 18:00!

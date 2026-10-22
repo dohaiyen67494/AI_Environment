@@ -16,9 +16,9 @@
 - [x] TASK-303: Cài đặt API Lưu và Lấy Ciphertext hồ sơ bệnh án (@agent-a) [DONE]
 
 ## Phase 4: Nghiệm thu & Hợp đồng Frontend
-- [ ] TASK-401: Xuất file OpenAPI / Swagger và hướng dẫn tích hợp DPoP cho Frontend (@agent-b)
-- [ ] TASK-402: Chạy bộ test nghiệm thu 6 tiêu chí mục 5 trong plan (@agent-b)
+- [x] TASK-401: Xuất file OpenAPI / Swagger và hướng dẫn tích hợp DPoP cho Frontend (@agent-b) [READY_FOR_REVIEW]
+- [x] TASK-402: Chạy bộ test nghiệm thu 6 tiêu chí mục 5 trong plan (@agent-b) [READY_FOR_REVIEW]
 
 ## Phase 5: Đóng gói bài thi (Hạn 18:00 22/10/2026)
-- [ ] TASK-501: Viết README.md (tối đa 300 từ, khớp 5 tiêu chí chấm điểm) (@agent-b)
-- [ ] TASK-502: Lập kịch bản video demo 2 phút theo đúng luồng đề bài (@agent-b)
+- [x] TASK-501: Viết README.md (tối đa 300 từ, khớp 5 tiêu chí chấm điểm) (@agent-b) [READY_FOR_REVIEW]
+- [x] TASK-502: Lập kịch bản video demo 2 phút theo đúng luồng đề bài (@agent-b) [READY_FOR_REVIEW]
