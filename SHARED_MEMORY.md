@@ -2,7 +2,7 @@
 
 ## Phase 1 Handoff: Môi trường & Database Schema (Agent A)
 **Branch:** `feature/phase-1-setup`  
-**Status:** `[READY_FOR_REVIEW]`  
+**Status:** `[DONE]` (Merged into `main` by Agent C)  
 **Date:** 2026-10-22
 
 ---
@@ -59,20 +59,15 @@ File: `prisma/seed.ts`
 
 ---
 
-### 4. Kết quả kiểm thử & Độ bao phủ (Test Results)
-- **Kiểm thử Schema Invariants (`src/prisma/schema-invariants.spec.ts`)**: PASS (100%)
-  - Đảm bảo đầy đủ enum `Role` (ADMIN, DOCTOR, PATIENT)
-  - Đảm bảo đầy đủ enum `AppointmentStatus`
-  - Đảm bảo `EncryptedRecord` không chứa bất kỳ trường plaintext nào
-  - Đảm bảo `Slot` và `Appointment` có unique constraint chống đặt trùng
-  - Đảm bảo `SignedPolicy` không chứa biến đếm mock admin
-- **Kiểm thử Exception Filter (`src/common/filters/prisma-exception.filter.spec.ts`)**: PASS (100%)
-  - `P2002` -> `409 Conflict`
-  - `P2025` -> `404 Not Found`
-  - `P2003` -> `400 Bad Request`
-- **Kiểm thử Controllers & Services**: PASS (100%)
-- **TypeScript Typecheck (`tsc --noEmit`)**: 0 errors
-- **Build (`npm run build`)**: Thành công
+### 4. Báo cáo Thẩm định của Reviewer (Agent C Review Approval)
+- **Người thẩm định**: Agent C (Reviewer)
+- **Kết quả Review**: **PASS (PHÊ DUYỆT 100%)**
+- **Đánh giá chi tiết**:
+  1. **Cổng chạy**: Tuân thủ nghiêm ngặt Backend port `3333` và TideCloak port `8080`.
+  2. **Bảo mật**: `EncryptedRecord` tuyệt đối không có plaintext; `SignedPolicy` tuân thủ mô hình mật mã Tide QEA, không giả lập biến đếm.
+  3. **Chống Race condition**: `Slot @@unique([doctorId, startTime])`, `Appointment.slotId @unique` và `PrismaExceptionFilter` chuyển lỗi `P2002` thành `409 Conflict`.
+  4. **Kiểm thử**: Đạt 15/15 tests, `tsc` 0 error, build production thành công.
+- **Hành động**: Đã duyệt merge branch `feature/phase-1-setup` vào nhánh chính `main`. Chuyển tiếp sang Phase 2.
 
 ---
 
