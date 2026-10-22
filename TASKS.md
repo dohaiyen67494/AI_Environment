@@ -7,8 +7,8 @@
 
 ## Phase 2: Xác minh cốt lõi Tide (Core Proof - Ưu tiên số 1)
 - [x] TASK-201: Cài đặt DPoP validation middleware trên NestJS (@agent-a) [READY_FOR_REVIEW]
-- [ ] TASK-202: Thiết lập realm Tide QEA với chính sách 2/3 Admin (@agent-b)
-- [ ] TASK-203: Viết test case chứng minh 1 admin ký KHÔNG giải mã được hồ sơ (@agent-b)
+- [x] TASK-202: Thiết lập realm Tide QEA với chính sách 2/3 Admin (@agent-b) [READY_FOR_REVIEW]
+- [x] TASK-203: Viết test case chứng minh 1 admin ký KHÔNG giải mã được hồ sơ (@agent-b) [READY_FOR_REVIEW]
 
 ## Phase 3: Nghiệp vụ Lịch hẹn & Hồ sơ mã hóa
 - [ ] TASK-301: Cài đặt API Đặt lịch với Idempotency-Key & chống race condition (@agent-a)
