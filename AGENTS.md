@@ -9,6 +9,7 @@ Xây dựng backend NestJS cho CareFlow. Trọng tâm: Bác sĩ chỉ giải mã
    - Backend chỉ lưu Ciphertext và Signed Policy; KHÔNG tạo endpoint giải mã trên backend.
    - Không được giả lập (fake/mock) phê duyệt nhiều admin bằng biến đếm trong database; bắt buộc phải chứng minh qua Tide QEA thật.
 3. **Chống Race Condition**: Đặt trùng slot cùng thời điểm phải trả về `409 Conflict`. Đổi lịch phải nằm trong 1 database transaction duy nhất.
-4. **Quy chuẩn Git**:
-   - Agent A code trên branch `feature/*` và mở PR.
-   - Agent B review, chạy test xác minh bảo mật trước khi cho phép merge.
+4. **Quy chuẩn Git & Phân công Agents**:
+   - **Agent A (Core Backend Developer)**: Code trên branch `feature/*` và mở PR.
+   - **Agent B (Tide & Security QA)**: Thiết lập realm, DPoP, chứng minh bảo mật QEA 2/3 Admin.
+   - **Agent C (Reviewer)**: Review mã nguồn, kiểm tra tính toàn vẹn kiến trúc & điều kiện bất biến, test coverage và phê duyệt merge PR trước khi hoàn tất task.

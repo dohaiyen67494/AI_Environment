@@ -1,4 +1,4 @@
-# Agent B - Tide Security & Reviewer
+# Agent B - Tide Security Specialist
 
 ## Trọng tâm kiểm thử (Security Checklist):
 1. **DPoP & Token Verification**:
