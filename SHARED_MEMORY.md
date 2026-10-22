@@ -71,5 +71,54 @@ File: `prisma/seed.ts`
 
 ---
 
+## Phase 2 Handoff: Xác minh cốt lõi Tide (Agent A)
+**Branch:** `feature/phase-2-tide-core`  
+**Status:** `[READY_FOR_REVIEW]` (TASK-201)  
+**Date:** 2026-10-22
+
+---
+
+### Cài đặt DPoP Validation Middleware / Guard theo chuẩn RFC 9449 (TASK-201)
+- **Module:** `src/auth/dpop/dpop.module.ts` (Global Module)
+- **Files chính:**
+  - `src/auth/dpop/dpop.types.ts`: Định nghĩa types chuẩn JWK, DPoPHeader, DPoPPayload, DPoPValidationResult.
+  - `src/auth/dpop/dpop-replay-cache.service.ts`: Service bộ nhớ đệm (In-Memory Replay Cache) theo dõi các `jti` đã sử dụng kèm thời gian sống TTL (mặc định 300s) và dọn dẹp định kỳ để chống Replay Attack tuyệt đối.
+  - `src/auth/dpop/dpop.service.ts`:
+    - Xác thực cấu trúc 3 phần của JWS DPoP proof.
+    - Kiểm tra `typ` header bắt buộc là `dpop+jwt`.
+    - Kiểm tra `alg` header: Bắt buộc là thuật toán bất đối xứng (`ES256`, `RS256`, `PS256`, `EdDSA`); cấm tuyệt đối thuật toán đối xứng (`HS*`) và `none`.
+    - Kiểm tra `jwk`: Xác thực public key của client, cấm tuyệt đối chứa khóa bí mật (`d`, `p`, `q`,...).
+    - Kiểm tra `htm`: Khớp chính xác phương thức HTTP (GET, POST,...).
+    - Kiểm tra `htu`: Khớp URI của request (bỏ query và fragment).
+    - Kiểm tra `iat`: Không quá cũ (> 300s) và không ở tương lai (> 60s clock skew).
+    - Kiểm tra `ath`: Khi có Access Token, tính `base64url(sha256(accessToken))` và so sánh với `ath` trong proof.
+    - Xác thực chữ ký số bằng Node.js `crypto` với Public Key lấy từ header JWK.
+    - Tích hợp hàm tiện ích `generateDPoPProof()` phục vụ kiểm thử và mô phỏng client.
+  - `src/auth/dpop/dpop.guard.ts`:
+    - NestJS `CanActivate` guard: Trích xuất `DPoP` header, `Authorization` (`DPoP <token>` hoặc `Bearer <token>`), URL và method.
+    - Ném lỗi HTTP `401 Unauthorized` nếu thiếu header hoặc sai chữ ký/mismatch/replay.
+    - Gắn `request.dpop = { payload, jwk }` vào request context cho các downstream controllers.
+  - `src/auth/dpop/dpop.decorator.ts`:
+    - `@CurrentDPoP()` và `@CurrentDPoPJwk()` để controller trích xuất DPoP context thuận tiện.
+
+### Kết quả kiểm thử Unit Test:
+- Tổng số test case: **41/41 PASS (100%)** qua 7 test suites.
+- Bộ test `dpop.service.spec.ts` (14 test cases):
+  - Pass với ES256 (P-256) và RS256.
+  - Chặn header `typ` sai.
+  - Chặn thuật toán đối xứng `HS256` và `alg: none`.
+  - Chặn JWK chứa private key.
+  - Chặn token hết hạn hoặc phát hành trong tương lai.
+  - Chặn sai method `htm` và sai URI `htu`.
+  - Chặn sai/thiếu hash access token `ath`.
+  - Chặn chữ ký giả mạo/sai lệch.
+  - **Chặn Replay Attack**: Gửi cùng 1 proof/jti lần 2 lập tức bị từ chối với lỗi `replay_detected`.
+- Bộ test `dpop.guard.spec.ts` (6 test cases):
+  - Chặn request thiếu header DPoP.
+  - Cho phép request hợp lệ và gắn context.
+  - Chặn sai method, sai URL, sai `ath`, và chặn Replay Attack ở cấp độ Guard.
+
+---
+
 ## Tide Verification Notes
 *(Agent B ghi lại kết quả test QEA 2/3 admin để dùng làm tư liệu cho video demo)*
