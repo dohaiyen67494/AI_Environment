@@ -11,9 +11,9 @@
 - [x] TASK-203: Viết test case chứng minh 1 admin ký KHÔNG giải mã được hồ sơ (@agent-b) [DONE]
 
 ## Phase 3: Nghiệp vụ Lịch hẹn & Hồ sơ mã hóa
-- [x] TASK-301: Cài đặt API Đặt lịch với Idempotency-Key & chống race condition (@agent-a) [READY_FOR_REVIEW]
-- [x] TASK-302: Cài đặt API Đổi lịch (Reschedule) trong 1 Transaction (@agent-a) [READY_FOR_REVIEW]
-- [x] TASK-303: Cài đặt API Lưu và Lấy Ciphertext hồ sơ bệnh án (@agent-a) [READY_FOR_REVIEW]
+- [x] TASK-301: Cài đặt API Đặt lịch với Idempotency-Key & chống race condition (@agent-a) [DONE]
+- [x] TASK-302: Cài đặt API Đổi lịch (Reschedule) trong 1 Transaction (@agent-a) [DONE]
+- [x] TASK-303: Cài đặt API Lưu và Lấy Ciphertext hồ sơ bệnh án (@agent-a) [DONE]
 
 ## Phase 4: Nghiệm thu & Hợp đồng Frontend
 - [ ] TASK-401: Xuất file OpenAPI / Swagger và hướng dẫn tích hợp DPoP cho Frontend (@agent-b)
