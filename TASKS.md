@@ -6,9 +6,9 @@
 - [x] TASK-103: Viết script Seed dữ liệu: 1 phòng khám, 2 bác sĩ, 1 bệnh nhân, 3 admin (@agent-a) [DONE]
 
 ## Phase 2: Xác minh cốt lõi Tide (Core Proof - Ưu tiên số 1)
-- [x] TASK-201: Cài đặt DPoP validation middleware trên NestJS (@agent-a) [READY_FOR_REVIEW]
-- [x] TASK-202: Thiết lập realm Tide QEA với chính sách 2/3 Admin (@agent-b) [READY_FOR_REVIEW]
-- [x] TASK-203: Viết test case chứng minh 1 admin ký KHÔNG giải mã được hồ sơ (@agent-b) [READY_FOR_REVIEW]
+- [x] TASK-201: Cài đặt DPoP validation middleware trên NestJS (@agent-a) [DONE]
+- [x] TASK-202: Thiết lập realm Tide QEA với chính sách 2/3 Admin (@agent-b) [DONE]
+- [x] TASK-203: Viết test case chứng minh 1 admin ký KHÔNG giải mã được hồ sơ (@agent-b) [DONE]
 
 ## Phase 3: Nghiệp vụ Lịch hẹn & Hồ sơ mã hóa
 - [ ] TASK-301: Cài đặt API Đặt lịch với Idempotency-Key & chống race condition (@agent-a)

@@ -59,7 +59,7 @@ File: `prisma/seed.ts`
 
 ---
 
-### 4. Báo cáo Thẩm định của Reviewer (Agent C Review Approval)
+### 4. Báo cáo Thẩm định của Reviewer (Agent C Review Approval - Phase 1)
 - **Người thẩm định**: Agent C (Reviewer)
 - **Kết quả Review**: **PASS (PHÊ DUYỆT 100%)**
 - **Đánh giá chi tiết**:
@@ -73,7 +73,7 @@ File: `prisma/seed.ts`
 
 ## Phase 2 Handoff: Xác minh cốt lõi Tide (Agent A)
 **Branch:** `feature/phase-2-tide-core`  
-**Status:** `[READY_FOR_REVIEW]` (TASK-201)  
+**Status:** `[DONE]` (Merged into `main` by Agent C)  
 **Date:** 2026-10-22
 
 ---
@@ -120,14 +120,9 @@ File: `prisma/seed.ts`
 
 ---
 
-## Tide Verification Notes
-*(Agent B ghi lại kết quả test QEA 2/3 admin để dùng làm tư liệu cho video demo)*
-
----
-
 ## Phase 2 Handoff & Tide Verification Notes (Agent B - Tide Security Specialist)
 **Branch:** `feature/phase-2-tide-core`  
-**Status:** `[READY_FOR_REVIEW]` (TASK-202 & TASK-203)  
+**Status:** `[DONE]` (Merged into `main` by Agent C)  
 **Date:** 2026-10-22  
 
 ---
@@ -225,9 +220,12 @@ Response: { isValid: false, errorCode: 'replay_detected', error: "DPoP proof tok
 
 ---
 
-### 5. Tổng kết Trạng thái Phase 2
-- **Cấu hình Realm TideCloak (TASK-202):** `[READY_FOR_REVIEW]`
-- **Chứng minh Bảo mật Tide QEA 2/3 Admin (TASK-203):** `[READY_FOR_REVIEW]`
-- **Tổng số Unit Tests toàn dự án:** `61/61 PASS (100%)`
-- **TypeScript build:** `0 errors`
-- Đã sẵn sàng chuyển giao cho **Agent C (Reviewer)** thẩm định và phê duyệt merge.
+### 5. Báo cáo Thẩm định của Reviewer (Agent C Review Approval - Phase 2)
+- **Người thẩm định**: Agent C (Reviewer)
+- **Kết quả Review**: **PASS (PHÊ DUYỆT 100%)**
+- **Đánh giá chi tiết**:
+  1. **Cổng dịch vụ & Realm**: `docker-compose.yml` và `careflow-realm.json` tuân thủ cổng TideCloak `8080`, Backend `3333`. Mount `--import-realm` tự động.
+  2. **Bảo mật QEA 2/3 Admin**: Xác minh chữ ký mật mã thật qua ECDSA P-256 (ES256). Đã có chứng minh thực nghiệm: 1 admin ký bị từ chối (`403 Forbidden`), 2/3 admin ký được chấp thuận (`200 OK`). Không dùng biến đếm giả lập trong DB.
+  3. **Nguyên tắc Zero-Knowledge & Default Deny**: Bác sĩ và Admin mặc định không có quyền giải mã hồ sơ nếu không có QEA quorum assertion hợp lệ.
+  4. **Chống Replay Attack**: Cơ chế nonce cache và JTI cache hoạt động chính xác cho cả DPoP và QEA Assertion.
+- **Hành động**: Đã duyệt merge branch `feature/phase-2-tide-core` vào `main`. Chuyển tiếp sang Phase 3.
