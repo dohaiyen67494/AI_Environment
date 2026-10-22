@@ -1,9 +1,9 @@
 # CareFlow Project Tasks
 
 ## Phase 1: Môi trường & Database Schema
-- [ ] TASK-101: Tạo Docker Compose (Postgres, NestJS, cấu hình TideCloak 8080) (@agent-a)
-- [ ] TASK-102: Khởi tạo Prisma Schema và Migration cho Lịch khám & Hồ sơ (@agent-a)
-- [ ] TASK-103: Viết script Seed dữ liệu: 1 phòng khám, 2 bác sĩ, 1 bệnh nhân, 3 admin (@agent-a)
+- [x] TASK-101: Tạo Docker Compose (Postgres, NestJS, cấu hình TideCloak 8080) (@agent-a) [READY_FOR_REVIEW]
+- [x] TASK-102: Khởi tạo Prisma Schema và Migration cho Lịch khám & Hồ sơ (@agent-a) [READY_FOR_REVIEW]
+- [x] TASK-103: Viết script Seed dữ liệu: 1 phòng khám, 2 bác sĩ, 1 bệnh nhân, 3 admin (@agent-a) [READY_FOR_REVIEW]
 
 ## Phase 2: Xác minh cốt lõi Tide (Core Proof - Ưu tiên số 1)
 - [ ] TASK-201: Cài đặt DPoP validation middleware trên NestJS (@agent-a)

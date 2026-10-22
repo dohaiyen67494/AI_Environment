@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # PostgreSQL Database Service
+  # =========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: careflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-careflow_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-careflow_password}
+      POSTGRES_DB: ${POSTGRES_DB:-careflow_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-careflow_user} -d ${POSTGRES_DB:-careflow_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - careflow-network
+
+  # =========================================================================
+  # TideCloak / Identity & QEA Service (Port 8080)
+  # Invariant Constraint: TideCloak runs on port 8080
+  # =========================================================================
+  tidecloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    container_name: careflow-tidecloak
+    restart: unless-stopped
+    command: start-dev --http-port=8080
+    environment:
+      KEYCLOAK_ADMIN: ${TIDECLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${TIDECLOAK_ADMIN_PASSWORD:-admin_password}
+      KC_HTTP_PORT: 8080
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - careflow-network
+
+  # =========================================================================
+  # CareFlow NestJS Backend API Service (Port 3333)
+  # Invariant Constraint: Backend API runs on port 3333
+  # =========================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: careflow-backend
+    restart: unless-stopped
+    environment:
+      PORT: 3333
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-careflow_user}:${POSTGRES_PASSWORD:-careflow_password}@postgres:5432/${POSTGRES_DB:-careflow_db}?schema=public
+      TIDECLOAK_URL: http://tidecloak:8080
+      TIDECLOAK_REALM: ${TIDECLOAK_REALM:-careflow}
+      TIDECLOAK_CLIENT_ID: ${TIDECLOAK_CLIENT_ID:-careflow-backend}
+      TIDECLOAK_CLIENT_SECRET: ${TIDECLOAK_CLIENT_SECRET:-tidecloak-secret}
+      JWT_SECRET: ${JWT_SECRET:-careflow-jwt-insecure-dev-secret}
+    ports:
+      - "3333:3333"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - careflow-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  careflow-network:
+    driver: bridge
